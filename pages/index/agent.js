@@ -39,7 +39,7 @@ Page({
   },
   onGenderChange(e) {
     const idx = e.detail.value
-    const genderArr = ['男', '女', '保密']
+    const genderArr = ['男', '女']
     this.setData({
       gender: genderArr[idx],
       genderIndex: Number(idx)

@@ -49,7 +49,7 @@ Page({
     const index = e.currentTarget.dataset.index
     const x = e.detail.x
     const movableX = this.data.movableX
-    movableX[index] = xs
+    movableX[index] = x // 修正变量名错误
     // 只有左滑超过-60才显示删除按钮
     if (x < -60) {
       this.setData({ showDeleteIndex: index })
