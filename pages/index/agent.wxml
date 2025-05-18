@@ -1,0 +1,68 @@
+<!-- 智能体详情页面 -->
+<view class="container agent-detail-container">
+  <view class="agent-avatar-area">
+    <image class="agent-avatar" src="/assets/tabbar/home.png" mode="aspectFill" />
+  </view>
+  <view class="form-area">
+    <view class="form-group">
+      <text class="label">智能体名称</text>
+      <view class="input-wrapper">
+        <input class="input" placeholder="请输入智能体名称" value="{{name}}" data-field="name" bindinput="onInput" />
+      </view>
+    </view>
+    <view class="form-group">
+      <text class="label">用户昵称</text>
+      <view class="input-wrapper">
+        <input class="input" placeholder="请输入小名" value="{{nickname}}" data-field="nickname" bindinput="onInput" />
+      </view>
+    </view>
+    <view class="form-group">
+      <text class="label">年龄</text>
+      <view class="input-wrapper">
+        <input class="input" type="number" placeholder="请输入年龄" value="{{age}}" data-field="age" bindinput="onInput" />
+      </view>
+    </view>
+    <view class="form-group">
+      <text class="label">性别</text>
+      <view class="input-wrapper">
+        <picker class="input gender-picker" mode="selector" range="{{['男','女','保密']}}" value="{{genderIndex}}" data-field="gender" bindchange="onGenderChange">
+          <view class="gender-value">{{gender || '请选择'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="form-group">
+      <text class="label">会员等级</text>
+      <view class="level">{{level}}</view>
+    </view>
+    <view class="form-group">
+      <button class="device-btn" bindtap="onBindDevice" wx:if="{{!deviceBound}}">绑定设备</button>
+      <view wx:if="{{deviceBound}}" class="device-icon-area">
+        <image class="device-icon" src="/assets/tabbar/home.png" bindtap="onDeviceIconTap" />
+        <text class="device-label">已绑定设备</text>
+      </view>
+    </view>
+    <button class="save-btn" bindtap="onSave">保存</button>
+  </view>
+
+  <!-- 设备绑定弹窗 -->
+  <view wx:if="{{showDeviceInput}}" class="device-modal-mask">
+    <view class="device-modal">
+      <text class="label">请输入绑定验证码</text>
+      <input class="input" placeholder="请输入验证码" value="{{deviceCode}}" bindinput="onDeviceCodeInput" />
+      <view class="device-modal-btns">
+        <button class="cancel-btn" bindtap="onDeviceCodeCancel">取消</button>
+        <button class="ok-btn" bindtap="onDeviceCodeConfirm">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 设备详情弹窗 -->
+  <view wx:if="{{showDeviceDetail}}" class="device-modal-mask" bindtap="onCloseDeviceDetail">
+    <view class="device-modal" catchtap="true">
+      <text class="label">设备详情</text>
+      <text>设备名称：智能设备A</text>
+      <text>设备状态：在线</text>
+      <button class="ok-btn" bindtap="onCloseDeviceDetail">关闭</button>
+    </view>
+  </view>
+</view>
