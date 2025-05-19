@@ -6,12 +6,25 @@ App({
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
 
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
+    // 检查是否已登录
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.redirectTo({ url: '/pages/login/login' });
+      return;
+    }
+
+    // 已登录则可在此处获取用户信息
+    // 可选：自动刷新用户信息
+    // wx.request({
+    //   url: 'https://your-api-domain.com/api/user/info',
+    //   method: 'GET',
+    //   header: { 'Authorization': token },
+    //   success: res => {
+    //     if (res.data.code === 0) {
+    //       wx.setStorageSync('userInfo', res.data.data);
+    //     }
+    //   }
+    // });
   },
   globalData: {
     userInfo: null

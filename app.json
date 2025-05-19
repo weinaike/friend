@@ -1,9 +1,11 @@
 {
   "pages": [
-    "pages/index/index",
+    "pages/index/index",        
+    "pages/login/login",
+   
     "pages/profile/profile",
     "pages/logs/logs",
-    "pages/index/agent"
+    "pages/index/agent"    
   ],
   "window": {
     "navigationBarTextStyle": "black",

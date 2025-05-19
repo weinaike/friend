@@ -8,15 +8,6 @@
     </view>
   </view>
   <view class="profile-menu">
-    <view class="profile-menu-item" bindtap="onEditProfile">
-      <text>编辑资料</text>
-    </view>
-    <view class="profile-menu-item">
-      <text>我的收藏</text>
-    </view>
-    <view class="profile-menu-item">
-      <text>账号安全</text>
-    </view>
     <view class="profile-menu-item logout" bindtap="onLogout">
       <text>退出登录</text>
     </view>
