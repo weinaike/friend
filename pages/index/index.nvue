@@ -17,7 +17,7 @@
 				</view>
 			</view>
 		</view>
-		<u-popup :show="showAddAgent" :closeOnClickOverlay="false">
+		<u-popup :show="showAddAgent" :closeOnClickOverlay="false" closeable="true" safeAreaInsetTop="true" @close="showAddAgent=false">
 			<view>
 				<!-- 注意，如果需要兼容微信小程序，最好通过setRules方法设置rules规则 -->
 				<u--form labelPosition="left" labelWidth="100" labelAlign="right" ref="uForm">
@@ -40,6 +40,9 @@
 						</u-radio-group>
 					</u-form-item>
 				</u--form>
+				<view style="padding: 20px;">
+					<u-button type="primary" icon="plus" text="保存"></u-button>
+				</view>
 			</view>
 		</u-popup>
 		<view style="padding: 20px;">
