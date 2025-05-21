@@ -1,0 +1,118 @@
+<template>
+	<view>
+		<view>
+			<u-row>
+				<u-col span="2" customStyle="margin: 20px">
+					<u-avatar size="60" :src="user.headImgUrl"></u-avatar>
+				</u-col>
+				<u-col span="2">
+					<u--text type="info" :text="user.nickName"></u--text>
+				</u-col>
+			</u-row>
+		</view>
+
+		<view class="cell-page">
+			<view class="u-page__item">
+				<text class="u-page__item__title">尽请期待</text>
+				<u-cell-group>
+					<u-cell icon="hourglass-half-fill" title="尽请期待">
+						<u-icon slot="right-icon" size="20" name="arrow-right"></u-icon>
+					</u-cell>
+				</u-cell-group>
+			</view>
+		</view>
+		<u-tabbar :value="1">
+			<u-tabbar-item v-for="item in tabbar.items" :key="item.name" :badge="item.badge" :name="item.name"
+				:text="item.text" :icon="item.icon" @click="onClick"></u-tabbar-item>
+		</u-tabbar>
+	</view>
+</template>
+
+<script>
+	import {
+		personal
+	} from '@/config/api.js';
+	import constants from '@/common/constants.js';
+	export default {
+		data() {
+			return {
+				tabbar: constants.tabbar,
+				title: '个人中心',
+				user: {
+					headImgUrl: ''
+				},
+				show: false
+			}
+		},
+		onLoad() {
+			personal().then(data => {
+				this.user = data
+			})
+		},
+		methods: {
+			onClick: constants.reload
+		}
+	}
+</script>
+
+<style lang="scss">
+	.cell-page {
+		padding-bottom: 20px;
+	}
+
+	.cell-box {
+		&__title {
+			font-size: 14px;
+			color: rgb(143, 156, 162);
+			margin: 20px 0px 0px 15px;
+		}
+
+		&__block {
+			// background-color: #fff;
+			margin-top: 20px;
+		}
+	}
+
+	.u-page {
+		padding: 0;
+
+		&__item {
+
+			&__title {
+				color: $u-tips-color;
+				background-color: $u-bg-color;
+				padding: 15px;
+				font-size: 15px;
+
+				&__slot-title {
+					color: $u-primary;
+					font-size: 14px;
+				}
+			}
+		}
+	}
+
+	.u-slot-title {
+		@include flex;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.u-cell-text {
+		font-size: 15px;
+		line-height: 22px;
+		color: #303133;
+		margin-right: 5px;
+	}
+
+	.u-slot-value {
+		line-height: 17px;
+		text-align: center;
+		font-size: 10px;
+		padding: 0 5px;
+		height: 17px;
+		color: #FFFFFF;
+		border-radius: 100px;
+		background-color: #f56c6c;
+	}
+</style>

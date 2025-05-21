@@ -1,0 +1,171 @@
+<template>
+	<view>
+		<u-empty :show="agentList.length==0" mode="data" icon="/static/img1.png" text="暂无智能体">
+		</u-empty>
+		<view class="container">
+			<!-- 用户卡片循环 -->
+			<view class="card" v-for="(agent, index) in agentList" :key="index">
+				<!-- 卡片头部 -->
+				<view class="header">
+					<text class="name">{{ agent.agentName }}</text>
+				</view>
+
+				<!-- 用户信息 -->
+				<view class="info">
+					<text>设备型号：{{ agent.ttsModelName }}</text>
+					<text>音色模型：{{ agent.ttsVoiceName }}</text>
+				</view>
+			</view>
+		</view>
+		<u-popup :show="showAddAgent" :closeOnClickOverlay="false">
+			<view>
+				<!-- 注意，如果需要兼容微信小程序，最好通过setRules方法设置rules规则 -->
+				<u--form labelPosition="left" labelWidth="100" labelAlign="right" ref="uForm">
+					<u-form-item label="智能体名称" prop="agent.agentName" borderBottom ref="item1">
+						<u--input v-model="agent.agentName" placeholder="请输入智能体名称" border="none"></u--input>
+					</u-form-item>
+					<u-form-item label="小主名称" prop="agent.nickName" borderBottom ref="item1">
+						<u--input v-model="agent.nickName" placeholder="请输入小主人名称" border="none"></u--input>
+					</u-form-item>
+					<u-form-item label="生日" prop="agent.birthday" @click="showBirthday = true;" borderBottom
+						ref="item1">
+						<u--input v-model="agent.birthdayFormat" disabled disabledColor="#ffffff" placeholder="请选择生日"
+							border="none"></u--input>
+						<u-icon slot="right" name="arrow-right"></u-icon>
+					</u-form-item>
+					<u-form-item label="性别" prop="agent.sex" borderBottom ref="item1">
+						<u-radio-group placement="row">
+							<u-radio v-for="(item, index) in sex" :key="index" :label="item.name" :name="item.value">
+							</u-radio>
+						</u-radio-group>
+					</u-form-item>
+				</u--form>
+			</view>
+		</u-popup>
+		<view style="padding: 20px;">
+			<u-button type="primary" icon="plus" text="新建智能体" @click="showAddAgent=true"></u-button>
+		</view>
+		<u-datetime-picker :show="showBirthday" v-model="agent.birthday" mode="date" :maxDate="new Date().getTime()"
+			minDate="315522000000" :formatter="formatter" ref="datetimePicker"
+			@confirm="selectBirthday"
+			@cancel="showBirthday=false"></u-datetime-picker>
+		<u-toast ref="uToast"></u-toast>
+		<u-overlay :show="$store.state.request_count>0">
+			<view class="warp">
+				<view class="rect" @tap.stop>
+					<u-loading-page :loading="true" loadingMode="circle" bgColor="rgba(50 50 50 / 31%)">
+					</u-loading-page>
+				</view>
+			</view>
+		</u-overlay>
+		<u-tabbar :value="0" @change="name => tabbar.value = name">
+			<u-tabbar-item v-for="item in tabbar.items" :key="item.name" :badge="item.badge" :name="item.name"
+				:text="item.text" :icon="item.icon" @click="onClick"></u-tabbar-item>
+		</u-tabbar>
+	</view>
+</template>
+
+<script>
+	import constants from '@/common/constants.js';
+	import {
+		agentList
+	} from '@/config/api.js';
+	export default {
+		data() {
+			return {
+				tabbar: constants.tabbar,
+				sex: constants.sex,
+				agentList: [],
+				agent: {},
+				showAddAgent: false,
+				showBirthday: false
+			}
+		},
+		onLoad(option) {
+			this.$refs.datetimePicker.setFormatter(this.formatter)
+			if (option.code && option.code != '') {
+				login({
+					"mode": "wechat",
+					"code": option.code
+				})
+			}
+			agentList({
+				params: {}
+			}).then((data) => {
+				console.log(data)
+				this.agentList = data
+			})
+		},
+		methods: {
+			onClick: constants.reload,
+			formatter(type, value) {
+				if (type === 'year') {
+					return `${value}年`
+				}
+				if (type === 'month') {
+					return `${value}月`
+				}
+				if (type === 'day') {
+					return `${value}日`
+				}
+				return value
+			},
+			selectBirthday(v) {
+				console.log(v)
+				this.showBirthday=false;
+				this.agent.birthdayFormat=uni.$u.timeFormat(v.value, 'yyyy年mm月dd日')
+			}
+		}
+	}
+</script>
+
+<style lang="scss">
+	.u-page__text-item {
+		margin-right: 10px;
+		flex: 1;
+	}
+
+	.u-demo-block__content {
+		@include flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.container {
+		padding: 20rpx;
+		background-color: #f5f5f5;
+	}
+
+	.card {
+		background: #fff;
+		border-radius: 12rpx;
+		padding: 24rpx;
+		margin-bottom: 20rpx;
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: left;
+			margin-bottom: 20rpx;
+
+			.name {
+				font-size: 32rpx;
+				font-weight: bold;
+			}
+
+			.icons {
+				display: flex;
+				gap: 20rpx;
+			}
+		}
+
+		.info {
+			margin-bottom: 24rpx;
+			font-size: 26rpx;
+			color: #666;
+			line-height: 1.6;
+		}
+	}
+</style>
