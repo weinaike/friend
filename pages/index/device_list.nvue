@@ -1,0 +1,174 @@
+<template>
+	<view class="container">
+		<u-empty :show="deviceList.length==0" mode="data" icon="/static/img1.png" text="暂无设备">
+		</u-empty>
+		<u-list scroll="auto">
+			<u-list-item v-for="(item,index) in deviceList" :key="index">
+				<view class="custom-card" @click="navToDetail(item.id)">
+					<view class="card-body">
+						<view class="info">
+							<view class="top-line">
+								<text class="model">{{item.board}}</text>
+							</view>
+							<u-line></u-line>
+							<view class="detail">
+								<text>固件版本: {{item.appVersion}}</text>
+								<text>绑定时间: {{item.createDate}}</text>
+							</view>
+						</view>
+					</view>
+					<!-- 右侧操作区域 -->
+					<view class="action-wrapper">
+						<u-button type="error" size="mini" plain custom-style="padding: 8rpx 20rpx;"
+							@click="unbindDevice(item.id)">
+							解绑
+						</u-button>
+					</view>
+				</view>
+			</u-list-item>
+			<view style="padding: 20px;">
+				<u-button type="primary" icon="plus" text="绑定设备" @click="showAddDevice=true"></u-button>
+			</view>
+		</u-list>
+		<u-popup :show="showAddDevice" :closeOnClickOverlay="false" closeable="true" safeAreaInsetTop="true"
+			@close="showAddDevice=false" @open="openAddDevice">
+			<view>
+				<!-- 注意，如果需要兼容微信小程序，最好通过setRules方法设置rules规则 -->
+				<u--form labelPosition="left" labelWidth="100" :model="device" labelAlign="right" ref="uForm"
+					:rules="rules" style="margin-left: 10px">
+					<u-form-item :required="true" label="设备验证码" prop="code" borderBottom>
+						<u--input v-model="device.code" placeholder="设备验证码" border="none"></u--input>
+					</u-form-item>
+				</u--form>
+				<view style="padding: 20px;">
+					<u-button type="primary" icon="plus" text="绑定" @click="submit"></u-button>
+				</view>
+			</view>
+		</u-popup>
+		<u-modal :show="showUnbindDialog" :content="`确认解绑该设备？`" show-cancel-button @confirm="confirmUnbind"></u-modal>
+	</view>
+</template>
+
+<script>
+	import {
+		deviceList,
+		unbindDevice,
+		bindDevice
+	} from '@/config/api.js';
+	export default {
+		data() {
+			return {
+				deviceList: [],
+				showUnbindDialog: false,
+				showAddDevice: false,
+				deviceId: '',
+				device: {
+					code: ''
+				},
+				agentId: '',
+				rules: {
+					'code': [{
+						type: 'string',
+						required: true,
+						message: '请输入验证码',
+						trigger: ['blur', 'change']
+					}, {
+						min: 6,
+						max: 6,
+						message: '请输入6位数字验证码',
+						trigger: ['blur', 'change'],
+					}],
+				},
+			}
+		},
+		onLoad(option) {
+			if (option && option.agentId) {
+				this.agentId = option.agentId;
+				this.loadData()
+			}
+		},
+		methods: {
+			async loadData() {
+				this.deviceList = await deviceList({
+					agentId: this.agentId
+				})
+			},
+			unbindDevice(id) {
+				this.deviceId = id;
+				this.showUnbindDialog = true;
+
+			},
+			confirmUnbind() {
+				this.showUnbindDialog = false;
+				unbindDevice({
+					deviceId: this.deviceId
+				}).then((data) => {
+					this.loadData()
+				})
+			},
+			openAddDevice() {
+				this.device = {
+					code: ''
+				}
+				this.$refs.uForm.clearValidate()
+			},
+			submit() {
+				this.$refs.uForm.validate().then(res => {
+					bindDevice({
+						agentId: this.agentId,
+						code: this.device.code
+					}).then((data) => {
+						this.showAddDevice = false
+						this.loadData()
+					})
+				}).catch(errors => {})
+			},
+		}
+	}
+</script>
+
+<style lang="scss">
+	.container {
+		padding: 20rpx;
+
+		.custom-card {
+			background: #fff;
+			border-radius: 16rpx;
+			margin: 20rpx;
+			box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+
+			.card-body {
+				display: flex;
+				padding: 20rpx;
+
+				.info {
+					flex: 1;
+					margin-left: 20rpx;
+
+					.top-line {
+						display: flex;
+						justify-content: space-between;
+
+						.model {
+							font-size: 32rpx;
+							font-weight: bold;
+						}
+					}
+
+					.detail {
+						display: flex;
+						justify-content: space-between;
+						margin-top: 10rpx;
+						color: #999;
+						font-size: 24rpx;
+					}
+				}
+			}
+		}
+	}
+
+	.action-wrapper {
+		margin-left: auto; // 关键布局属性
+		padding-left: 20rpx;
+	}
+</style>

@@ -15,43 +15,54 @@
 					<text>设备型号：{{ agent.ttsModelName }}</text>
 					<text>音色模型：{{ agent.ttsVoiceName }}</text>
 				</view>
+
+				<!-- 操作按钮 -->
+				<u-row gutter="10">
+					<u-col span="4">
+						<u-button type="primary" size="mini"
+							@click="showDeviceList(agent.id)">设备管理({{ agent.deviceCount }})</u-button>
+					</u-col>
+				</u-row>
 			</view>
 		</view>
-		<u-popup :show="showAddAgent" :closeOnClickOverlay="false" closeable="true" safeAreaInsetTop="true" @close="showAddAgent=false">
+		<u-popup :show="showAddAgent" :closeOnClickOverlay="false" closeable="true" safeAreaInsetTop="true"
+			@close="showAddAgent=false" @open="openAddAgent">
 			<view>
 				<!-- 注意，如果需要兼容微信小程序，最好通过setRules方法设置rules规则 -->
-				<u--form labelPosition="left" labelWidth="100" labelAlign="right" ref="uForm">
-					<u-form-item label="智能体名称" prop="agent.agentName" borderBottom ref="item1">
+				<u--form labelPosition="left" labelWidth="100" :model="agent" labelAlign="right" ref="uForm"
+					:rules="rules" style="margin-left: 10px">
+					<u-form-item :required="true" label="智能体名称" prop="agentName" borderBottom>
 						<u--input v-model="agent.agentName" placeholder="请输入智能体名称" border="none"></u--input>
 					</u-form-item>
-					<u-form-item label="小主名称" prop="agent.nickName" borderBottom ref="item1">
+					<u-form-item label="小主名称" prop="nickName" borderBottom>
 						<u--input v-model="agent.nickName" placeholder="请输入小主人名称" border="none"></u--input>
 					</u-form-item>
-					<u-form-item label="生日" prop="agent.birthday" @click="showBirthday = true;" borderBottom
-						ref="item1">
-						<u--input v-model="agent.birthdayFormat" disabled disabledColor="#ffffff" placeholder="请选择生日"
+					<u-form-item label="生日" prop="birthday" @click="showBirthday = true;" borderBottom>
+						<u--input v-model="agent.birthday" disabled disabledColor="#ffffff" placeholder="请选择生日"
 							border="none"></u--input>
 						<u-icon slot="right" name="arrow-right"></u-icon>
 					</u-form-item>
-					<u-form-item label="性别" prop="agent.sex" borderBottom ref="item1">
-						<u-radio-group placement="row">
+					<u-form-item label="性别" prop="sex" borderBottom>
+						<u-radio-group placement="row" v-model="agent.sex">
 							<u-radio v-for="(item, index) in sex" :key="index" :label="item.name" :name="item.value">
 							</u-radio>
 						</u-radio-group>
 					</u-form-item>
+					<u-form-item label="会员等级" borderBottom>
+						<u--text type="primary" text="限时免费"></u--text>
+					</u-form-item>
 				</u--form>
 				<view style="padding: 20px;">
-					<u-button type="primary" icon="plus" text="保存"></u-button>
+					<u-button type="primary" icon="plus" text="保存" @click="submit"></u-button>
 				</view>
 			</view>
 		</u-popup>
 		<view style="padding: 20px;">
 			<u-button type="primary" icon="plus" text="新建智能体" @click="showAddAgent=true"></u-button>
 		</view>
-		<u-datetime-picker :show="showBirthday" v-model="agent.birthday" mode="date" :maxDate="new Date().getTime()"
-			minDate="315522000000" :formatter="formatter" ref="datetimePicker"
-			@confirm="selectBirthday"
-			@cancel="showBirthday=false"></u-datetime-picker>
+		<u-datetime-picker :show="showBirthday" v-model="birthday" mode="date" :maxDate="new Date().getTime()"
+			minDate="315522000000" :formatter="formatter" ref="datetimePicker" @confirm="selectBirthday"
+			@cancel="birthdayClose" @close="birthdayClose"></u-datetime-picker>
 		<u-toast ref="uToast"></u-toast>
 		<u-overlay :show="$store.state.request_count>0">
 			<view class="warp">
@@ -71,7 +82,8 @@
 <script>
 	import constants from '@/common/constants.js';
 	import {
-		agentList
+		agentList,
+		addAgent
 	} from '@/config/api.js';
 	export default {
 		data() {
@@ -79,13 +91,48 @@
 				tabbar: constants.tabbar,
 				sex: constants.sex,
 				agentList: [],
-				agent: {},
+				agent: {
+					agentName: '',
+					nickName: '',
+					sex: '',
+					birthday: '',
+				},
+				birthday: '',
 				showAddAgent: false,
-				showBirthday: false
+				showBirthday: false,
+				rules: {
+					'agentName': {
+						type: 'string',
+						required: true,
+						message: '请输入智能体名称',
+						trigger: ['blur', 'change']
+					},
+					'birthday': {
+						type: 'string',
+						required: true,
+						message: '请选择生日',
+						trigger: ['blur', 'change']
+					},
+					'nickName': {
+						type: 'string',
+						max: 5,
+						required: true,
+						message: '请输入小主人名称',
+						trigger: ['blur', 'change']
+					},
+					'sex': {
+						type: 'string',
+						max: 1,
+						required: true,
+						message: '请选择性别',
+						trigger: ['blur', 'change']
+					},
+				},
 			}
 		},
 		onLoad(option) {
 			this.$refs.datetimePicker.setFormatter(this.formatter)
+			this.$refs.uForm.setRules(this.rules)
 			if (option.code && option.code != '') {
 				login({
 					"mode": "wechat",
@@ -115,8 +162,44 @@
 			},
 			selectBirthday(v) {
 				console.log(v)
-				this.showBirthday=false;
-				this.agent.birthdayFormat=uni.$u.timeFormat(v.value, 'yyyy年mm月dd日')
+				this.showBirthday = false;
+				this.agent.birthday = uni.$u.timeFormat(v.value, 'yyyy-mm-dd')
+				this.$refs.uForm.validateField('birthday')
+			},
+			openAddAgent() {
+				this.agent = {
+					agentName: '',
+					nickName: '',
+					sex: '',
+					birthday: '',
+				}
+				this.$refs.uForm.clearValidate()
+			},
+			submit() {
+				this.$refs.uForm.validate().then(res => {
+					addAgent(this.agent).then((data) => {
+						this.showAddAgent = false
+						agentList({
+							params: {}
+						}).then((data) => {
+							console.log(data)
+							this.agentList = data
+						})
+					})
+				}).catch(errors => {})
+			},
+			birthdayClose() {
+				this.showBirthday = false
+				this.$refs.uForm.validateField('birthday')
+			},
+			showDeviceList(id) {
+				uni.$u.route({
+					type: 'navigateTo',
+					url: '/pages/index/device_list',
+					params: {
+						agentId: id
+					}
+				})
 			}
 		}
 	}
@@ -169,6 +252,14 @@
 			font-size: 26rpx;
 			color: #666;
 			line-height: 1.6;
+		}
+
+		.buttons {
+			display: flex;
+			justify-content: space-between;
+			/* 或 space-around */
+			gap: 15rpx;
+			/* 按钮间距 */
 		}
 	}
 </style>

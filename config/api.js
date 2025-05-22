@@ -3,8 +3,18 @@ const http = uni.$u.http
 // 智能体列表
 export const agentList = (params) => http.get('/agent/list', params)
 
-// 搜索
-export const search = (params) => http.get('/video/video/search', params)
+// 添加智能体
+export const addAgent = (params, config = {}) => http.post('/agent', params, config)
+
+// 设备列表
+export const deviceList = (params, config = {}) => http.get('/device/bind/' + params.agentId, config)
+
+// 解绑设备
+export const unbindDevice = (params, config = {}) => http.post('/device/unbind', params, config)
+
+// 绑定设备
+export const bindDevice = (params, config = {}) => http.post('/device/bind/' + params.agentId + '/' + params.code,
+	config)
 
 // 最新，最热
 export const topVideo = (params) => http.get('/video/video', params)
