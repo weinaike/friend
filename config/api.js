@@ -16,6 +16,12 @@ export const unbindDevice = (params, config = {}) => http.post('/device/unbind',
 export const bindDevice = (params, config = {}) => http.post('/device/bind/' + params.agentId + '/' + params.code,
 	config)
 
+// 登录
+export const login = (params, config = {}) => http.post('/user/login', params, config)
+
+// 注册
+export const register = (params, config = {}) => http.post('/user/register', params, config)
+
 // 最新，最热
 export const topVideo = (params) => http.get('/video/video', params)
 

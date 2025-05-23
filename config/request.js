@@ -17,7 +17,7 @@ module.exports = (vm) => {
 		if (config?.custom?.loading !== false) {
 			vm.$store.state.request_count++
 		}
-		config.header.Authorization = "Bearer daaabfd4de0dd4f5f1ba75ae62b8a8c0";//uni.getStorageSync("token");
+		config.header.Authorization = "Bearer "+uni.getStorageSync("token");
 		// }
 		return config
 	}, config => { // 可使用async await 做异步操作
@@ -44,11 +44,8 @@ module.exports = (vm) => {
 
 			if (data.code === 401) {
 				uni.$u.route({
-					type: 'navigateTo',
-					url: '/pages/index/exclusiveLogin',
-					params: {
-						redirect_uri: encodeURIComponent(location.href)
-					}
+					type: 'reLaunch',
+					url: '/pages/login/login'
 				})
 			}
 

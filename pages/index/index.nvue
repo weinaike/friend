@@ -115,7 +115,6 @@
 					},
 					'nickName': {
 						type: 'string',
-						max: 5,
 						required: true,
 						message: '请输入小主人名称',
 						trigger: ['blur', 'change']
