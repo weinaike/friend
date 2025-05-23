@@ -1,0 +1,114 @@
+<template name="login">
+	<view class="container">
+		<view class="logo-container">
+			<u--image src="/static/img1.png" width="150px" height="150px" shape="circle"></u--image>
+		</view>
+		<u-form :model="form" labelWidth="60" labelAlign="right" :rules="rules" ref="uForm">
+			<u-form-item label="手机号" prop="mobile">
+				<u-input v-model="form.mobile" placeholder="请输入手机号" />
+			</u-form-item>
+			<u-form-item label="密码" prop="password">
+				<u-input v-model="form.password" placeholder="请输入密码" password />
+			</u-form-item>
+			<u-form-item label="验证码" prop="captcha">
+				<u-input v-model="form.captcha" placeholder="请输入验证码" />
+				<u--image :src="captchaUrl" slot="right" width="150px" height="24px" @click="refreshCaptcha"></u--image>
+			</u-form-item>
+		</u-form>
+		<view style="padding: 20px;">
+			<u-button type="primary" @click="submit">登录</u-button>
+			<u-button type="default" @click="toRegister">注册账号</u-button>
+		</view>
+	</view>
+</template>
+
+<script>
+	import {
+		login
+	} from '@/config/api.js';
+	export default {
+		data() {
+			return {
+				form: {
+					areaCode: '+86',
+					mobile: '',
+					username: '',
+					password: '',
+					captcha: '',
+					captchaId: ''
+				},
+				captchaUrl: '',
+				rules: {
+					mobile: [{
+						required: true,
+						message: '请输入手机号',
+						trigger: ['change', 'blur'],
+					}, {
+						min: 11,
+						max: 11,
+						message: '手机号格式不正确',
+						trigger: ['blur', 'change'],
+					}],
+					password: [{
+						required: true,
+						message: '请输入密码',
+						trigger: ['change', 'blur'],
+					}, {
+						min: 6,
+						max: 20,
+						message: '密码长度6-20位',
+						trigger: ['change', 'blur'],
+					}],
+					captcha: [{
+						required: true,
+						message: '请输入验证码',
+						trigger: ['change', 'blur'],
+					}]
+				}
+			}
+		},
+		onLoad() {
+			this.refreshCaptcha()
+		},
+		methods: {
+			submit() {
+				this.form.username = this.form.areaCode + this.form.mobile;
+				this.$refs.uForm.validate().then(a => {
+					login(this.form, {
+						custom: {
+							catch: true
+						}
+					}).then((data) => {
+						uni.setStorageSync('token', data.token)
+						uni.$u.toast('登录成功')
+						uni.$u.route({
+							type: 'reLaunch',
+							url: '/pages/index/index'
+						})
+					}).catch(res => {
+						this.refreshCaptcha()
+					})
+				}).catch(errors => {})
+			},
+			toRegister() {
+				uni.navigateTo({
+					url: '/pages/login/register'
+				})
+			},
+			refreshCaptcha() {
+				this.form.captchaId = uni.$u.guid();
+				this.captchaUrl = "https://friend.yes-tek.com/xiaozhi/user/captcha?uuid=" + this.form.captchaId
+			}
+		}
+	}
+</script>
+
+<style lang="scss">
+	.logo-container {
+		display: flex;
+		justify-content: center;
+		/* 水平居中 */
+		align-items: center;
+		/* 垂直居中 */
+	}
+</style>
