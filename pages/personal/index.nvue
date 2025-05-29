@@ -3,7 +3,7 @@
 		<view>
 			<u-row>
 				<u-col span="2" customStyle="margin: 20px">
-					<u-avatar size="60" :src="user.headImgUrl"></u-avatar>
+					<u-avatar size="60" :src="user.headImgUrl || './static/img1.png'"></u-avatar>
 				</u-col>
 				<u-col span="2">
 					<u--text type="info" :text="user.nickName"></u--text>
@@ -13,9 +13,9 @@
 
 		<view class="cell-page">
 			<view class="u-page__item">
-				<text class="u-page__item__title">尽请期待</text>
+				<text class="u-page__item__title">操作说明</text>
 				<u-cell-group>
-					<u-cell icon="hourglass-half-fill" title="尽请期待">
+					<u-cell icon="info-circle-fill" title="查看操作说明" @click="goInstruction">
 						<u-icon slot="right-icon" size="20" name="arrow-right"></u-icon>
 					</u-cell>
 				</u-cell-group>
@@ -39,7 +39,8 @@
 				tabbar: constants.tabbar,
 				title: '个人中心',
 				user: {
-					headImgUrl: ''
+					headImgUrl: '',
+					nickName: ''
 				},
 				show: false
 			}
@@ -50,6 +51,11 @@
 			})
 		},
 		methods: {
+			goInstruction() {
+				uni.navigateTo({
+					url: '/pages/personal/instruction'
+				})
+			},
 			onClick: constants.reload
 		}
 	}

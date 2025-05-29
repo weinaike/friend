@@ -25,7 +25,7 @@
 				</u-row>
 			</view>
 		</view>
-		<u-popup :show="showAddAgent" :closeOnClickOverlay="false" closeable="true" safeAreaInsetTop="true"
+		<u-popup :show="showAddAgent" :closeOnClickOverlay="false" :closeable="true" :safeAreaInsetTop="true"
 			@close="showAddAgent=false" @open="openAddAgent">
 			<view>
 				<!-- 注意，如果需要兼容微信小程序，最好通过setRules方法设置rules规则 -->
@@ -61,7 +61,7 @@
 			<u-button type="primary" icon="plus" text="新建智能体" @click="showAddAgent=true"></u-button>
 		</view>
 		<u-datetime-picker :show="showBirthday" v-model="birthday" mode="date" :maxDate="new Date().getTime()"
-			minDate="315522000000" :formatter="formatter" ref="datetimePicker" @confirm="selectBirthday"
+			:minDate="315522000000" :formatter="formatter" ref="datetimePicker" @confirm="selectBirthday"
 			@cancel="birthdayClose" @close="birthdayClose"></u-datetime-picker>
 		<u-toast ref="uToast"></u-toast>
 		<u-overlay :show="$store.state.request_count>0">
@@ -130,9 +130,15 @@
 			}
 		},
 		onLoad(option) {
-			this.$refs.datetimePicker.setFormatter(this.formatter)
-			this.$refs.uForm.setRules(this.rules)
-			if (option.code && option.code != '') {
+			this.$nextTick(() => {
+				if (this.$refs.datetimePicker && this.$refs.datetimePicker.setFormatter) {
+					this.$refs.datetimePicker.setFormatter(this.formatter)
+				}
+				if (this.$refs.uForm && this.$refs.uForm.setRules) {
+					this.$refs.uForm.setRules(this.rules)
+				}
+			})
+			if (option && option.code && option.code != '') {
 				login({
 					"mode": "wechat",
 					"code": option.code

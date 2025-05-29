@@ -28,6 +28,12 @@
 			"style": {
 				"navigationBarTitleText": "注册"
 			}
+		},
+		{
+			"path": "pages/personal/instruction",
+			"style": {
+				"navigationBarTitleText": "操作说明"
+			}
 		}
 	],
 	"globalStyle": {
