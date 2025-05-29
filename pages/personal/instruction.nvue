@@ -21,23 +21,24 @@
         <text>1. 启动配网模式：短按按键3次，听到“已进入配网模式”提示音。</text>
         <text>2. 手机连接WiFi：打开手机WiFi设置，搜索并连接以 Friend_XXXXXX 开头的热点（XXXXXX为设备随机码，如Friend_A1B2C3）。</text>
         <text>3. 输入WiFi信息：连接成功后，手机会自动弹出配网页面（或手动打开浏览器访问http://192.168.4.1）。在页面中输入您家庭路由器的 WiFi名称及密码（需选择2.4GHz频段）。</text>
+        <image src="/static/wifi.png" mode="widthFix" />
         <text>4. 获取验证码：配网成功后，音箱将语音播报6位数字验证码（如123456），请记录备用。</text>
       </view>
     </view>
     <view class="section">
       <view class="section-title">四、设备绑定与使用</view>
       <view class="section-content">
-        <text>1. 微信小程序绑定：打开微信，扫描设备或说明书上的小程序码，进入绑定界面。输入音箱播报的6位验证码，完成设备绑定。</text>
-        <text>2. 开始使用：绑定成功后，可通过语音唤醒词（如“小X同学”）或短按按键唤醒音箱，进行对话、点播音乐、控制智能家居等操作。</text>
+        <text>1. 微信小程序绑定：打开微信，扫描设备或说明书上的小程序码，新建智能体，然后为智能体添加设备，进入绑定界面。输入音箱播报的6位验证码，完成设备绑定。</text>
+        <text>2. 开始使用：绑定成功后，可通过语音唤醒词（如“你好，小新”）或短按按键唤醒音箱，进行对话、点播音乐等操作。</text>
       </view>
     </view>
     <view class="section">
       <view class="section-title">五、注意事项</view>
       <view class="section-content">
         <text> WiFi要求：仅支持2.4GHz频段网络，请确保路由器已开启该频段。</text>
-        <text> 验证码时效：6位验证码仅一次有效，若配网失败需重新操作。</text>
+        <text> 设备验证码：设备6位验证码，需在小程序种绑定智能体。</text>
         <text> 配网失败：重启音箱并重新进入配网模式，检查WiFi密码是否正确。</text>
-        <text> 无法绑定：确认手机与音箱处于同一WiFi网络，或重启小程序重试。</text>
+        <text> 无法绑定：确认手机与音箱处于同一WiFi网络，手机，音箱，路由器三者靠近。</text>
       </view>
     </view>
   </view>
