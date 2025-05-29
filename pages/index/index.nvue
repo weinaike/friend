@@ -12,8 +12,8 @@
 
 				<!-- 用户信息 -->
 				<view class="info">
-					<text>设备型号：{{ agent.ttsModelName }}</text>
-					<text>音色模型：{{ agent.ttsVoiceName }}</text>
+					<text>小主：{{ agent.nickName }}</text>
+					<text>年龄：{{ agent.birthday }}</text>
 				</view>
 
 				<!-- 操作按钮 -->

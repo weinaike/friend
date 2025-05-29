@@ -1,5 +1,5 @@
 {
-    "name" : "一起看",
+    "name" : "童伴AI",
     "appid" : "__UNI__ABCCA7D",
     "description" : "",
     "versionName" : "1.0.0",
@@ -89,7 +89,7 @@
             "mode" : "history",
             "base" : "/video/"
         },
-        "title" : "一起看",
+        "title" : "童伴AI",
         "devServer" : {
             "port" : 8081,
             "disableHostCheck" : true

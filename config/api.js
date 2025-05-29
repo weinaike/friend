@@ -6,6 +6,9 @@ export const agentList = (params) => http.get('/agent/list', params)
 // 添加智能体
 export const addAgent = (params, config = {}) => http.post('/agent', params, config)
 
+// 删除智能体
+export const deleteAgent = (params, config = {}) => http.delete('/agent/' + params.agentId, config)
+
 // 设备列表
 export const deviceList = (params, config = {}) => http.get('/device/bind/' + params.agentId, config)
 
