@@ -4,7 +4,7 @@
 		</u-empty>
 		<view class="container">
 			<!-- 用户卡片循环 -->
-			<view class="card" v-for="(agent, index) in agentList" :key="index">
+			<view class="card"  v-for="(agent, index) in agentList" :key="index" @click="onEditAgent(index)">
 				<!-- 卡片头部 -->
 				<view class="header">
 					<text class="name">{{ agent.agentName }}</text>
@@ -13,7 +13,7 @@
 				<!-- 用户信息 -->
 				<view class="info">
 					<text>小主：{{ agent.nickName }}</text>
-					<text>年龄：{{ agent.birthday }}</text>
+					<text>年龄：{{ getAge(agent.birthday) }}</text>
 				</view>
 
 				<!-- 操作按钮 -->
@@ -40,7 +40,6 @@
 					<u-form-item label="生日" prop="birthday" @click="showBirthday = true;" borderBottom>
 						<u--input v-model="agent.birthday" disabled disabledColor="#ffffff" placeholder="请选择生日"
 							border="none"></u--input>
-						<u-icon slot="right" name="arrow-right"></u-icon>
 					</u-form-item>
 					<u-form-item label="性别" prop="sex" borderBottom>
 						<u-radio-group placement="row" v-model="agent.sex">
@@ -97,9 +96,11 @@
 					sex: '',
 					birthday: '',
 				},
-				birthday: '',
+				birthday: '2020-01-01',
 				showAddAgent: false,
 				showBirthday: false,
+				showEditAgent: false, // 新增：编辑弹窗状态
+				editAgentIndex: null, // 新增：当前编辑的agent索引
 				rules: {
 					'agentName': {
 						type: 'string',
@@ -130,6 +131,7 @@
 			}
 		},
 		onLoad(option) {
+			console.log('onLoad', option)
 			this.$nextTick(() => {
 				if (this.$refs.datetimePicker && this.$refs.datetimePicker.setFormatter) {
 					this.$refs.datetimePicker.setFormatter(this.formatter)
@@ -149,7 +151,12 @@
 			}).then((data) => {
 				console.log(data)
 				this.agentList = data
+
 			})
+		},
+		onReady() {
+			console.log('onReady');
+			console.log(this.agentList);
 		},
 		methods: {
 			onClick: constants.reload,
@@ -177,21 +184,66 @@
 					nickName: '',
 					sex: '',
 					birthday: '',
-				}
-				this.$refs.uForm.clearValidate()
+				};
+				this.showEditAgent = false;
+				this.editAgentIndex = null;
+				this.$refs.uForm.clearValidate();
 			},
+			// 新增：点击卡片编辑
+			onEditAgent(index) {
+				console.log('onEditAgent', this.agentList, index)
+				const agent = JSON.parse(JSON.stringify(this.agentList[index]));
+				this.agent = 
+				{
+					agentName: agent.agentName,
+					nickName: agent.nickName,
+					sex: agent.sex,
+					birthday: agent.birthday,
+					id: agent.id
+				};
+				console.log(this.agent)
+
+				this.showAddAgent = true;
+				this.showEditAgent = true;
+				this.editAgentIndex = index;
+				this.$nextTick(() => {
+					if (this.$refs.uForm && this.$refs.uForm.setRules) {
+						this.$refs.uForm.setRules(this.rules)
+					}
+					if (this.$refs.uForm) {
+						this.$refs.uForm.clearValidate();
+					}
+				});
+			},
+			// 修改submit方法，支持编辑和新建
 			submit() {
 				this.$refs.uForm.validate().then(res => {
-					addAgent(this.agent).then((data) => {
-						this.showAddAgent = false
-						agentList({
-							params: {}
+					if (this.showEditAgent && this.agent.id) {
+						// 编辑模式，调用更新接口
+						updateAgent({
+							agentId: this.agent.id,
+							agentName: this.agent.agentName,
+							nickName: this.agent.nickName,
+							sex: this.agent.sex,
+							birthday: this.agent.birthday
 						}).then((data) => {
-							console.log(data)
-							this.agentList = data
-						})
-					})
-				}).catch(errors => {})
+							this.showAddAgent = false;
+							this.showEditAgent = false;
+							this.editAgentIndex = null;
+							agentList({ params: {} }).then((data) => {
+								// this.agentList = data;
+							});
+						});
+					} else {
+						// 新建模式
+						addAgent(this.agent).then((data) => {
+							this.showAddAgent = false;
+							agentList({ params: {} }).then((data) => {
+								this.agentList = data;
+							});
+						});
+					}
+				}).catch(errors => {});
 			},
 			birthdayClose() {
 				this.showBirthday = false
@@ -205,7 +257,36 @@
 						agentId: id
 					}
 				})
-			}
+			},
+			getAge(birthday) {
+				console.log(this.agentList[0].agentName, birthday)
+				if (!birthday) return '';
+				// 兼容 yyyy-mm-dd 或 yyyy/MM/dd
+				let parts = birthday.split(/[-\/]/);
+				if (parts.length < 3) return '';
+				let birthYear = parseInt(parts[0]);
+				let birthMonth = parseInt(parts[1]);
+				let birthDay = parseInt(parts[2]);
+				if (isNaN(birthYear) || isNaN(birthMonth) || isNaN(birthDay)) return '';
+				// 当前日期
+				let now = new Date(2025, 4, 31); // 2025年5月31日, 月份从0开始
+				let year = now.getFullYear() - birthYear;
+				let month = now.getMonth() + 1 - birthMonth;
+				if (month < 0) {
+					year--;
+					month += 12;
+				}
+				// 处理天数，如果本月还没到生日，月数减1
+				if (now.getDate() < birthDay) {
+					month--;
+					if (month < 0) {
+						year--;
+						month += 12;
+					}
+				}
+				if (year < 0) return '';
+				return `${year}岁${month}月`;
+			},
 		}
 	}
 </script>

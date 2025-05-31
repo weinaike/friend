@@ -14,6 +14,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "uview-ui": "^2.0.31"
+    "uview-ui": "^2.0.38"
   }
 }

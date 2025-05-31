@@ -9,6 +9,9 @@ export const addAgent = (params, config = {}) => http.post('/agent', params, con
 // 删除智能体
 export const deleteAgent = (params, config = {}) => http.delete('/agent/' + params.agentId, config)
 
+// 更新智能体
+export const updateAgent = (params, config = {}) => http.put('/agent/' + params.agentId, params, config)
+
 // 设备列表
 export const deviceList = (params, config = {}) => http.get('/device/bind/' + params.agentId, config)
 
