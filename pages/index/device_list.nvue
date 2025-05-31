@@ -88,6 +88,11 @@
 				this.deviceList = await deviceList({
 					agentId: this.agentId
 				})
+                // 新增：操作后同步设备数量到首页
+                uni.$emit('deviceCountChanged', {
+                    agentId: this.agentId,
+                    count: this.deviceList.length
+                });
 			},
 			unbindDevice(id) {
 				this.deviceId = id;

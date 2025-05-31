@@ -326,7 +326,25 @@
 					}
 				});
 			},
-		}
+		},
+		// 新增：监听页面设备数量变化
+		onShow() {
+			if (!this._deviceCountListener) {
+				this._deviceCountListener = ({ agentId, count }) => {
+					const agent = this.agentList.find(a => a.id === agentId);
+					if (agent) {
+						agent.deviceCount = count;
+					}
+				};
+				uni.$on('deviceCountChanged', this._deviceCountListener);
+			}
+		},
+		onUnload() {
+			if (this._deviceCountListener) {
+				uni.$off('deviceCountChanged', this._deviceCountListener);
+				this._deviceCountListener = null;
+			}
+		},
 	}
 </script>
 

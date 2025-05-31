@@ -65,7 +65,7 @@ export const lastUpdated = (params) => http.get('/video/video/last-updated', par
 export const myFollow = (params) => http.get('/video/follow', params)
 
 // 个人信息
-export const personal = (params) => http.get('/user/user/personal', params)
+export const personal = (params) => http.get('/xiaozhi/user/info', params)
 
 // 合并列表
 export const mergeList = (params) => http.get('/video/video/merge-list', params)
