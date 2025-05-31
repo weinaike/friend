@@ -1,32 +1,30 @@
 <template>
 	<view>
-		<u-empty :show="agentList.length==0" mode="data" icon="/static/img1.png" text="暂无智能体">
+		<u-empty :show="agentList.length==0" mode="data" icon="/static/agent.png" text="暂无智能体">
 		</u-empty>
 		<view class="container">
 			<!-- 用户卡片循环 -->
-			<view class="card"  v-for="(agent, index) in agentList" :key="index" @click="onEditAgent(index)">
+			<view class="card"  v-for="(agent, index) in agentList" :key="index">
 				<!-- 卡片头部 -->
 				<view class="header">
 					<text class="name">{{ agent.agentName }}</text>
+					<view class="header-actions">
+						<view class="device-tag" @click="showDeviceList(agent.id)">
+							设备管理({{ agent.deviceCount }})
+						</view>
+						<u-icon name="trash" color="#f56c6c" size="28" @click="onDeleteAgent(agent.id, index)"></u-icon>
+					</view>
 				</view>
 
 				<!-- 用户信息 -->
-				<view class="info">
+				<view class="info" @click="onEditAgent(index)">
 					<text>小主：{{ agent.nickName }}</text>
 					<text>年龄：{{ getAge(agent.birthday) }}</text>
 				</view>
-
-				<!-- 操作按钮 -->
-				<u-row gutter="10">
-					<u-col span="4">
-						<u-button type="primary" size="mini"
-							@click="showDeviceList(agent.id)">设备管理({{ agent.deviceCount }})</u-button>
-					</u-col>
-				</u-row>
 			</view>
 		</view>
 		<u-popup :show="showAddAgent" :closeOnClickOverlay="false" :closeable="true" :safeAreaInsetTop="true"
-			@close="showAddAgent=false" @open="openAddAgent">
+			@close="closeAddAgent" @open="openAddAgent">
 			<view>
 				<!-- 注意，如果需要兼容微信小程序，最好通过setRules方法设置rules规则 -->
 				<u--form labelPosition="left" labelWidth="100" :model="agent" labelAlign="right" ref="uForm"
@@ -82,7 +80,9 @@
 	import constants from '@/common/constants.js';
 	import {
 		agentList,
-		addAgent
+		updateAgent,
+		addAgent,
+		deleteAgent
 	} from '@/config/api.js';
 	export default {
 		data() {
@@ -91,6 +91,7 @@
 				sex: constants.sex,
 				agentList: [],
 				agent: {
+					agentId: '',
 					agentName: '',
 					nickName: '',
 					sex: '',
@@ -131,7 +132,6 @@
 			}
 		},
 		onLoad(option) {
-			console.log('onLoad', option)
 			this.$nextTick(() => {
 				if (this.$refs.datetimePicker && this.$refs.datetimePicker.setFormatter) {
 					this.$refs.datetimePicker.setFormatter(this.formatter)
@@ -154,10 +154,6 @@
 
 			})
 		},
-		onReady() {
-			console.log('onReady');
-			console.log(this.agentList);
-		},
 		methods: {
 			onClick: constants.reload,
 			formatter(type, value) {
@@ -179,29 +175,52 @@
 				this.$refs.uForm.validateField('birthday')
 			},
 			openAddAgent() {
+				if (this.showEditAgent === false) {
+					this.agent = {
+						agentId: '',
+						agentName: '',
+						nickName: '',
+						sex: '',
+						birthday: '',
+						};
+					this.showEditAgent = false;
+					this.editAgentIndex = null;
+					this.$refs.uForm.clearValidate();
+				}
+			},
+			closeAddAgent() {
+				this.showAddAgent = false;
+				this.showEditAgent = false;
+				this.editAgentIndex = null;
 				this.agent = {
+					agentId: '',
 					agentName: '',
 					nickName: '',
 					sex: '',
 					birthday: '',
 				};
-				this.showEditAgent = false;
-				this.editAgentIndex = null;
-				this.$refs.uForm.clearValidate();
+			},
+			openEditAgent() {
+				this.showEditAgent = true;
+				this.$nextTick(() => {
+					if (this.$refs.uForm && this.$refs.uForm.setRules) {
+						this.$refs.uForm.setRules(this.rules)
+					}
+					if (this.$refs.uForm) {
+						this.$refs.uForm.clearValidate();
+					}
+				});
 			},
 			// 新增：点击卡片编辑
 			onEditAgent(index) {
-				console.log('onEditAgent', this.agentList, index)
-				const agent = JSON.parse(JSON.stringify(this.agentList[index]));
-				this.agent = 
-				{
+				const agent = this.agentList[index];
+				this.agent = {
+					agentId: agent.id,
 					agentName: agent.agentName,
 					nickName: agent.nickName,
 					sex: agent.sex,
 					birthday: agent.birthday,
-					id: agent.id
 				};
-				console.log(this.agent)
 
 				this.showAddAgent = true;
 				this.showEditAgent = true;
@@ -218,10 +237,10 @@
 			// 修改submit方法，支持编辑和新建
 			submit() {
 				this.$refs.uForm.validate().then(res => {
-					if (this.showEditAgent && this.agent.id) {
+					if (this.showEditAgent) {
 						// 编辑模式，调用更新接口
 						updateAgent({
-							agentId: this.agent.id,
+							agentId: this.agent.agentId,
 							agentName: this.agent.agentName,
 							nickName: this.agent.nickName,
 							sex: this.agent.sex,
@@ -231,7 +250,7 @@
 							this.showEditAgent = false;
 							this.editAgentIndex = null;
 							agentList({ params: {} }).then((data) => {
-								// this.agentList = data;
+								this.agentList = data;
 							});
 						});
 					} else {
@@ -259,7 +278,6 @@
 				})
 			},
 			getAge(birthday) {
-				console.log(this.agentList[0].agentName, birthday)
 				if (!birthday) return '';
 				// 兼容 yyyy-mm-dd 或 yyyy/MM/dd
 				let parts = birthday.split(/[-\/]/);
@@ -287,6 +305,27 @@
 				if (year < 0) return '';
 				return `${year}岁${month}月`;
 			},
+			// 新增：删除智能体
+			async onDeleteAgent(id, index) {
+				const agent = this.agentList[index];
+				if (agent.deviceCount > 0) {
+					uni.$u.toast('请先解绑该智能体下的所有设备后再删除');
+					return;
+				}
+				const that = this;
+				uni.showModal({
+					title: '确认删除',
+					content: '确定要删除该智能体吗？',
+					success(res) {
+						if (res.confirm) {
+							deleteAgent({ agentId: id }).then(() => {
+								that.agentList.splice(index, 1);
+								uni.$u.toast('删除成功');
+							});
+						}
+					}
+				});
+			},
 		}
 	}
 </script>
@@ -295,13 +334,6 @@
 	.u-page__text-item {
 		margin-right: 10px;
 		flex: 1;
-	}
-
-	.u-demo-block__content {
-		@include flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		align-items: center;
 	}
 
 	.container {
@@ -318,19 +350,40 @@
 
 		.header {
 			display: flex;
+			flex-direction: row;
 			justify-content: space-between;
-			align-items: left;
+			align-items: center;
 			margin-bottom: 20rpx;
+			position: relative;
+		}
 
-			.name {
-				font-size: 32rpx;
-				font-weight: bold;
-			}
+		.name {
+			font-size: 32rpx;
+			font-weight: bold;
+			flex: 1;
+			text-align: left;
+			display: flex;
+			align-items: center;
+		}
 
-			.icons {
-				display: flex;
-				gap: 20rpx;
-			}
+		.header-actions {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			gap: 16rpx;
+		}
+
+		.device-tag {
+			color: #1890ff;
+			font-size: 32rpx;
+			font-weight: bold;
+			display: flex;
+			align-items: center;
+		}
+
+		.u-icon {
+			margin-left: 12rpx;
+			position: static;
 		}
 
 		.info {

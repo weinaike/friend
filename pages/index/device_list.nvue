@@ -4,25 +4,21 @@
 		</u-empty>
 		<u-list scroll="auto">
 			<u-list-item v-for="(item,index) in deviceList" :key="index">
-				<view class="custom-card" @click="navToDetail(item.id)">
+				<view class="custom-card" >
 					<view class="card-body">
 						<view class="info">
 							<view class="top-line">
 								<text class="model">{{item.board}}</text>
+								<u-icon name="trash" color="#f56c6c" size="28" @click.native="unbindDevice(item.id)"></u-icon>
 							</view>
 							<u-line></u-line>
 							<view class="detail">
 								<text>固件版本: {{item.appVersion}}</text>
 								<text>绑定时间: {{item.createDate}}</text>
+								<text>最近连接: {{item.lastConnectedAt}}</text>
+								<!-- <text>自动更新: {{item.autoUpdate===1 ? '开启' : '关闭'}}</text> -->
 							</view>
 						</view>
-					</view>
-					<!-- 右侧操作区域 -->
-					<view class="action-wrapper">
-						<u-button type="error" size="mini" plain custom-style="padding: 8rpx 20rpx;"
-							@click="unbindDevice(item.id)">
-							解绑
-						</u-button>
 					</view>
 				</view>
 			</u-list-item>
@@ -30,7 +26,7 @@
 				<u-button type="primary" icon="plus" text="绑定设备" @click="showAddDevice=true"></u-button>
 			</view>
 		</u-list>
-		<u-popup :show="showAddDevice" :closeOnClickOverlay="false" closeable="true" safeAreaInsetTop="true"
+		<u-popup :show="showAddDevice" :closeOnClickOverlay="false" :closeable="true" :safeAreaInsetTop="true"	mode="center" 
 			@close="showAddDevice=false" @open="openAddDevice">
 			<view>
 				<!-- 注意，如果需要兼容微信小程序，最好通过setRules方法设置rules规则 -->
@@ -45,7 +41,7 @@
 				</view>
 			</view>
 		</u-popup>
-		<u-modal :show="showUnbindDialog" :content="`确认解绑该设备？`" show-cancel-button @confirm="confirmUnbind"></u-modal>
+		<u-modal :show="showUnbindDialog" :content="`确认解绑该设备？`" show-cancel-button @confirm="confirmUnbind" @cancel="cancelUnbind"></u-modal>
 	</view>
 </template>
 
@@ -103,8 +99,12 @@
 				unbindDevice({
 					deviceId: this.deviceId
 				}).then((data) => {
-					this.loadData()
-				})
+					this.loadData();
+				});
+			},
+			// 新增：处理取消解绑
+			cancelUnbind() {
+				this.showUnbindDialog = false;
 			},
 			openAddDevice() {
 				this.device = {
@@ -147,12 +147,16 @@
 
 					.top-line {
 						display: flex;
+						flex-direction: row;
 						justify-content: space-between;
+						align-items: center;
+					}
 
-						.model {
-							font-size: 32rpx;
-							font-weight: bold;
-						}
+					.model {
+						font-size: 32rpx;
+						font-weight: bold;
+						flex: left;
+						text-align: left;
 					}
 
 					.detail {
@@ -168,7 +172,6 @@
 	}
 
 	.action-wrapper {
-		margin-left: auto; // 关键布局属性
-		padding-left: 20rpx;
+		display: none;
 	}
 </style>

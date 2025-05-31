@@ -3,7 +3,7 @@
 		<view>
 			<u-row>
 				<u-col span="2" customStyle="margin: 20px">
-					<u-avatar size="60" :src="user.headImgUrl || '/static/img1.png'"></u-avatar>
+					<u-avatar size="60" :src="user.headImgUrl || '/static/logo.png'"></u-avatar>
 				</u-col>
 				<u-col span="2">
 					<u--text type="info" :text="user.nickName"></u--text>

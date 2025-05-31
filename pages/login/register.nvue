@@ -1,7 +1,7 @@
 <template name="register">
 	<view class="container">
 		<view class="logo-container">
-			<u--image src="/static/img1.png" width="150px" height="150px" shape="circle"></u--image>
+			<u--image src="/static/logo.png" width="150px" height="150px" shape="circle"></u--image>
 		</view>
 		<u-form :model="form" labelWidth="80" labelAlign="right" :rules="rules" ref="uForm">
 			<u-form-item label="手机号" prop="mobile">
