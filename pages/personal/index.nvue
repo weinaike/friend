@@ -12,6 +12,14 @@
 					<u-cell icon="info-circle-fill" title="操作说明" @click="goInstruction">
 						<u-icon slot="right-icon" size="20" name="arrow-right"></u-icon>
 					</u-cell>
+					<!-- 新增：修改密码 -->
+					<u-cell icon="lock" title="修改密码" @click="goChangePassword">
+						<u-icon slot="right-icon" size="20" name="arrow-right"></u-icon>
+					</u-cell>
+					<!-- 新增：退出登录 -->
+					<u-cell icon="reload" title="退出登录" @click="logout">
+						<u-icon slot="right-icon" size="20" name="arrow-right"></u-icon>
+					</u-cell>
 				</u-cell-group>
 			</view>
 		</view>
@@ -20,40 +28,83 @@
 			<u-tabbar-item v-for="item in tabbar.items" :key="item.name" :badge="item.badge" :name="item.name"
 				:text="item.text" :icon="item.icon" @click="onClick"></u-tabbar-item>
 		</u-tabbar>
+
+		<!-- 修改密码弹窗 -->
+		<u-modal :show="showPwdDialog" title="修改密码" @confirm="submitChangePassword" @cancel="showPwdDialog=false" show-cancel-button>
+			<view style="display:flex;flex-direction:column;gap:12px;">
+				<u--input v-model="pwdForm.oldPassword" type="password" placeholder="原密码" border="surround" />
+				<u--input v-model="pwdForm.newPassword" type="password" placeholder="新密码(6-20位)" border="surround" />
+				<u--input v-model="pwdForm.confirmPassword" type="password" placeholder="确认新密码" border="surround" />
+			</view>
+		</u-modal>
 	</view>
 </template>
 
 <script>
-	import {
-		personal
-	} from '@/config/api.js';
-	import constants from '@/common/constants.js';
-	export default {
-		data() {
-			return {
+import { personal, changePassword } from '@/config/api.js';
+import constants from '@/common/constants.js';
+export default {
+	data() {
+		return {
 				tabbar: constants.tabbar,
 				title: '个人中心',
 				user: {
 					headImgUrl: '',
 					nickName: ''
 				},
-				show: false
-			}
-		},
-		onLoad() {
+				show: false,
+				showPwdDialog: false, // 控制修改密码弹窗
+				pwdForm: {
+					oldPassword: '',
+					newPassword: '',
+					confirmPassword: ''
+				},
+		}
+	},
+	onLoad() {
 			// personal().then(data => {
 			// 	this.user = data
 			// })
+	},
+	methods: {
+		goInstruction() {
+			uni.navigateTo({ url: '/pages/personal/instruction' })
 		},
-		methods: {
-			goInstruction() {
-				uni.navigateTo({
-					url: '/pages/personal/instruction'
-				})
-			},
-			onClick: constants.reload
-		}
+		// 跳转到修改密码弹窗
+		goChangePassword() {
+			this.pwdForm = { oldPassword: '', newPassword: '', confirmPassword: '' };
+			this.showPwdDialog = true;
+		},
+		// 修改密码提交
+		submitChangePassword() {
+			if (!this.pwdForm.oldPassword || !this.pwdForm.newPassword || !this.pwdForm.confirmPassword) {
+				uni.$u.toast('请填写完整信息'); return;
+			}
+			if (this.pwdForm.newPassword.length < 6 || this.pwdForm.newPassword.length > 20) {
+				uni.$u.toast('新密码长度需为6-12位'); return;
+			}
+			if (this.pwdForm.newPassword !== this.pwdForm.confirmPassword) {
+				uni.$u.toast('两次输入的新密码不一致'); return;
+			}
+			changePassword({
+				password: this.pwdForm.oldPassword,
+				newPassword: this.pwdForm.newPassword
+			}).then(() => {
+				this.showPwdDialog = false;
+				uni.$u.toast('密码修改成功，请重新登录');
+				setTimeout(() => { this.logout(); }, 1200);
+			}).catch(e => {
+				uni.$u.toast(e.msg || '密码修改失败');
+			});
+		},
+		// 退出登录
+		logout() {
+			uni.clearStorageSync();
+			uni.reLaunch({ url: '/pages/login/login' });
+		},
+		onClick: constants.reload
 	}
+}
 </script>
 
 <style lang="scss">

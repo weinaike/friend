@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "official-account": "plugin://official-account/official-account"
+  }
+}

@@ -2,6 +2,10 @@
 	<view>
 		<u-empty :show="agentList.length==0" mode="data" icon="/static/agent.png" text="暂无智能体">
 		</u-empty>
+		<!-- 微信公众号关注组件，仅在微信小程序环境下显示 -->
+		<view v-if="isMpWeixin" style="margin: 20rpx 0;">
+			<official-account />
+		</view>
 		<view class="container">
 			<!-- 用户卡片循环 -->
 			<view class="card"  v-for="(agent, index) in agentList" :key="index">
@@ -102,6 +106,7 @@
 				showBirthday: false,
 				showEditAgent: false, // 新增：编辑弹窗状态
 				editAgentIndex: null, // 新增：当前编辑的agent索引
+				isMpWeixin: false, // 新增：是否为微信小程序
 				rules: {
 					'agentName': {
 						type: 'string',
@@ -132,6 +137,14 @@
 			}
 		},
 		onLoad(option) {
+			// Detect platform
+			let platform = '';
+			try {
+				platform = uni.getSystemInfoSync().platform;
+			} catch (e) {}
+			// For mp-weixin, platform is 'mp-weixin' or 'weixin' depending on build
+			this.isMpWeixin = (platform === 'mp-weixin' || platform === 'weixin');
+
 			this.$nextTick(() => {
 				if (this.$refs.datetimePicker && this.$refs.datetimePicker.setFormatter) {
 					this.$refs.datetimePicker.setFormatter(this.formatter)

@@ -96,3 +96,6 @@ export const loginByUid = (params, config = {}) => http.post('/user/user/login-b
 
 // wxconfig签名
 export const jsConfig = (params) => http.get('/wechat/js-config', params)
+
+// 修改密码
+export const changePassword = (params, config = {}) => http.put('/user/change-password', params, config)
