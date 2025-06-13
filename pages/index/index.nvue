@@ -19,12 +19,13 @@
 						<view class="device-tag" @click="showChatHistory(agent.id)">
 							成长报告
 						</view>
-						<u-icon name="trash" color="#f56c6c" size="28" @click="onDeleteAgent(agent.id, index)"></u-icon>
+						<u-icon name="edit-pen" color="#1890ff" size="26" @click="onEditAgent(index)"></u-icon>
+						<u-icon name="trash" color="#f56c6c" size="26" @click="onDeleteAgent(agent.id, index)"></u-icon>
 					</view>
 				</view>
 
 				<!-- 用户信息 -->
-				<view class="info" @click="onEditAgent(index)">
+				<view class="info">
 					<text>小主：{{ agent.nickName }}</text>
 					<text>年龄：{{ getAge(agent.birthday) }}</text>
 				</view>
