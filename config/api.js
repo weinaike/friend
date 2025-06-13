@@ -99,3 +99,9 @@ export const jsConfig = (params) => http.get('/wechat/js-config', params)
 
 // 修改密码
 export const changePassword = (params, config = {}) => http.put('/user/change-password', params, config)
+
+// 获取智能体会话列表
+export const getAgentSessions = (params, config = {}) => http.get(`/agent/${params.agentId}/sessions`, { params });
+
+// 获取智能体聊天记录
+export const getAgentChatHistory = (params, config = {}) => http.get(`/agent/${params.agentId}/chat-history/${params.sessionId}`, config);

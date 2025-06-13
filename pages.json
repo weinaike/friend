@@ -34,6 +34,18 @@
 			"style": {
 				"navigationBarTitleText": "操作说明"
 			}
+		},
+		{
+			"path": "pages/index/chat-history",
+			"style": {
+				"navigationBarTitleText": "聊天记录"
+			}
+		},
+		{
+			"path": "pages/index/session-list",
+			"style": {
+				"navigationBarTitleText": "会话列表"
+			}
 		}
 	],
 	"globalStyle": {

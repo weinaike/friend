@@ -1,0 +1,140 @@
+<template>
+  <view>
+    <view class="session-list-header">成长报告</view>
+    
+    <view class="session-list-container">
+      <view class="session-list">
+        <view v-if="loading" class="session-item">加载中...</view>
+        <view v-if="sessions.length === 0 && !loading" class="session-item">暂无会话记录</view>
+        <view v-for="session in sessions" :key="session.sessionId" class="session-item" @click="goToChat(session)">
+          <view class="session-info">
+            <image class="avatar" src="/static/chat.png" />
+            <view class="session-time">{{ formatTime(session.createdAt) }}</view>
+            <view class="message-count">{{ session.chatCount > 99 ? '99' : session.chatCount }}</view>
+          </view>        
+        </view>
+        <view v-if="!hasMore && sessions.length > 0" class="session-item">没有更多了</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import { getAgentSessions } from '@/config/api.js';
+export default {
+  data() {
+    return {
+      agentId: '',
+      sessions: [],
+      page: 1,
+      limit: 20,
+      hasMore: true,
+      loading: false,
+    };
+  },
+  onLoad(options) {
+    if (options && options.agentId) {
+      this.agentId = options.agentId;
+      this.loadSessions();
+    }
+  },
+  methods: {
+    loadSessions() {
+      if (this.loading || !this.hasMore) return;
+      this.loading = true;
+      getAgentSessions({ agentId: this.agentId, page: this.page, limit: this.limit }).then(res => {
+        const list = Array.isArray(res.list) ? res.list : [];
+        console.log('加载会话列表:', list);
+        this.hasMore = list.length === this.limit;
+        this.sessions = [...this.sessions, ...list];
+        this.page++;
+        this.loading = false;
+      });
+    },
+    goToChat(session) {
+      uni.navigateTo({
+        url: `/pages/index/chat-history?agentId=${this.agentId}&sessionId=${session.sessionId}`
+      });
+    },
+    formatTime(ts) {
+      const date = new Date(ts);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      if (date >= today) {
+        return `今天 ${hours}:${minutes}`;
+      } else if (date >= yesterday) {
+        return `昨天 ${hours}:${minutes}`;
+      } else {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+      }
+    },
+  }
+}
+</script>
+
+<style scoped>
+.session-list-header {
+  width: 100%;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #222;
+  text-align: center;
+  padding: 32rpx 0 16rpx 0;
+  background: #fafbfc;
+}
+.session-list-container { height: 100vh; background: #fafbfc; padding: 0; }
+.session-list { width: 100%; overflow-y: auto; }
+.session-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  margin: 0 24rpx 12rpx 24rpx;
+  padding: 20rpx 24rpx;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.session-item:active, .session-item.active {
+  background: #e6f7ff;
+  box-shadow: 0 4rpx 16rpx rgba(24,144,255,0.08);
+}
+.session-info {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32rpx;
+}
+.avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+}
+.session-time {
+  flex: 1;
+  font-size: 22rpx;
+  color: #888;
+  text-align: center;
+}
+.message-count {
+  font-size: 22rpx;
+  color: #fff;
+  background: #1890ff;
+  border-radius: 20rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  padding: 0 10rpx;
+}
+</style>

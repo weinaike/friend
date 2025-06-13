@@ -16,6 +16,9 @@
 						<view class="device-tag" @click="showDeviceList(agent.id)">
 							设备管理({{ agent.deviceCount }})
 						</view>
+						<view class="device-tag" @click="showChatHistory(agent.id)">
+							成长报告
+						</view>
 						<u-icon name="trash" color="#f56c6c" size="28" @click="onDeleteAgent(agent.id, index)"></u-icon>
 					</view>
 				</view>
@@ -290,6 +293,15 @@
 					}
 				})
 			},
+			showChatHistory(id) {
+				uni.$u.route({
+					type: 'navigateTo',
+					url: '/pages/index/session-list',
+					params: {
+						agentId: id
+					}
+				})
+			},
 			getAge(birthday) {
 				if (!birthday) return '';
 				// 兼容 yyyy-mm-dd 或 yyyy/MM/dd
@@ -406,7 +418,7 @@
 
 		.device-tag {
 			color: #1890ff;
-			font-size: 32rpx;
+			font-size: 26rpx;
 			font-weight: bold;
 			display: flex;
 			align-items: center;

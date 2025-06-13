@@ -1,0 +1,102 @@
+<template>
+  <view class="chat-history-container">
+    <view class="chat-content">
+      <view v-if="messages.length > 0">
+        <view v-for="(message, index) in messagesWithTime" :key="message.id">
+          <view v-if="message.type === 'time'" class="time-divider">{{ message.content }}</view>
+          <view v-else :class="['message-item', message.chatType === 1 ? 'user-message' : 'agent-message']">
+            <image v-if="message.chatType !== 1" class="avatar" src="/static/agent.png"/>
+            <view class="message-content">{{ message.content }}</view>
+            <image v-if="message.chatType === 1" class="avatar" src="/static/user.png"/>
+          </view>
+        </view>
+      </view>
+      <view v-else class="no-session-selected">暂无聊天记录</view>
+    </view>
+  </view>
+</template>
+
+<script>
+import { getAgentChatHistory } from '@/config/api.js';
+export default {
+  data() {
+    return {
+      agentId: '',
+      sessionId: '',
+      messages: [],
+      currentMacAddress: '',
+    };
+  },
+  onLoad(options) {
+    if (options && options.agentId && options.sessionId) {
+      this.agentId = options.agentId;
+      this.sessionId = options.sessionId;
+      this.loadChatHistory();
+    }
+  },
+  methods: {
+    loadChatHistory() {
+      getAgentChatHistory({ agentId: this.agentId, sessionId: this.sessionId }).then(res => {
+        this.messages = Array.isArray(res) ? res : [];
+        if (this.messages.length > 0 && this.messages[0].macAddress) {
+          this.currentMacAddress = this.messages[0].macAddress;
+        }
+      });
+    },
+    formatTime(ts) {
+      const date = new Date(ts);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      if (date >= today) {
+        return `今天 ${hours}:${minutes}`;
+      } else if (date >= yesterday) {
+        return `昨天 ${hours}:${minutes}`;
+      } else {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+      }
+    },
+  },
+  computed: {
+    messagesWithTime() {
+      if (!this.messages || this.messages.length === 0) return [];
+      const result = [];
+      const TIME_INTERVAL = 60 * 1000;
+      if (this.messages[0]) {
+        result.push({ type: 'time', content: this.formatTime(this.messages[0].createdAt), id: `time-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` });
+      }
+      for (let i = 0; i < this.messages.length; i++) {
+        const currentMessage = this.messages[i];
+        result.push(currentMessage);
+        if (i < this.messages.length - 1) {
+          const currentTime = new Date(currentMessage.createdAt).getTime();
+          const nextTime = new Date(this.messages[i + 1].createdAt).getTime();
+          if (nextTime - currentTime > TIME_INTERVAL) {
+            result.push({ type: 'time', content: this.formatTime(this.messages[i + 1].createdAt), id: `time-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` });
+          }
+        }
+      }
+      return result;
+    }
+  }
+}
+</script>
+
+<style scoped>
+.chat-history-container { display: flex; flex-direction: column; height: 100vh; }
+.chat-content { flex: 1; padding: 20rpx; overflow-y: auto; background: #fff; }
+.message-item { display: flex; align-items: flex-end; margin-bottom: 20rpx; }
+.user-message { flex-direction: row-reverse; }
+.agent-message { flex-direction: row; }
+.message-content { max-width: 60%; padding: 16rpx 24rpx; border-radius: 16rpx; background: #f0f0f0; color: #333; margin: 0 12rpx; word-break: break-all; }
+.user-message .message-content { background: #1890ff; color: #fff; }
+.avatar { width: 48rpx; height: 48rpx; border-radius: 50%; }
+.no-session-selected { color: #999; text-align: center; margin-top: 100rpx; }
+.time-divider { text-align: center; color: #999; font-size: 22rpx; margin: 16rpx 0; }
+</style>
